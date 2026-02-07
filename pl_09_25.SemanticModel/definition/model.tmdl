@@ -1,0 +1,52 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup 'Transform File from PL_2009_2019 (2)'
+
+	annotation PBI_QueryGroupOrder = 2
+
+queryGroup 'Transform File from PL_2009_2019 (2)\Helper Queries'
+
+	annotation PBI_QueryGroupOrder = 0
+
+queryGroup 'Transform File from PL_2019_2025'
+
+	annotation PBI_QueryGroupOrder = 2
+
+queryGroup 'Transform File from PL_2019_2025\Helper Queries'
+
+	annotation PBI_QueryGroupOrder = 0
+
+annotation PBI_QueryOrder = ["PL_2009_2019","Sample File (2)","Parameter2","Transform Sample File (2)","Transform File (2)","schema","PL_2019_2025","Sample File","Parameter1","Transform Sample File","Transform File","PL_2008_2025","Team","season-0809"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBIDesktopVersion = 2.145.1262.0 (25.07)+10bdeda5ab0db954b2cf824e7a117ad7cee97f88
+
+annotation __TEdtr = 1
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table schema
+ref table PL_2008_2025
+ref table Team
+ref table ClusterMappingTable
+ref table 'ClusterMappingTable 2'
+ref table DateTableTemplate_c89c545c-3e3a-40ff-b51a-c610ac61d2ef
+ref table LocalDateTable_82e71c33-c928-4efc-ad0d-a0098d3c5c3c
+ref table 'ClusterMappingTable 3'
+ref table 'ClusterMappingTable 4'
+ref table 'ClusterMappingTable 5'
+ref table 'ClusterMappingTable 6'
+ref table 'ClusterMappingTable 7'
+ref table 'ClusterMappingTable 8'
+ref table TeamChoice
+ref table TeamChoiceMap
+
+ref cultureInfo en-US
+

@@ -1,0 +1,60 @@
+table 'ClusterMappingTable 3'
+	isHidden
+	isPrivate
+	lineageTag: 63866c96-956c-4386-916f-1dd584f79ba3
+
+	column Teams
+		lineageTag: bb55e8fe-f7a9-4699-b121-859de6028612
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Teams]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 4","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column ClusterId
+		formatString: 0
+		lineageTag: e0c8bd83-a506-4aaf-a412-68a79fbb2b5d
+		summarizeBy: count
+		isNameInferred
+		sourceColumn: [ClusterId]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 4","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	partition 'ClusterMappingTable 3' = calculated
+		mode: import
+		source = ```
+				VAR __DS0Core = 
+					SUMMARIZECOLUMNS(
+						'Team'[Teams],
+						"SOT_Conceded___Match", 'PL_2008_2025'[SOT Conceded / Match],
+						"Goals_Conceded___Match", 'PL_2008_2025'[Goals Conceded / Match]
+					)
+				
+				VAR __DataTransformT0 = 
+					KMeansClustering(
+						SELECTCOLUMNS(
+							__DS0Core,
+							"Teams", 'Team'[Teams],
+							"SOT_Conceded___Match", [SOT_Conceded___Match],
+							"Goals_Conceded___Match", [Goals_Conceded___Match]
+						),
+						{("[SOT_Conceded___Match]", "Attribute"),
+							("[Teams]", "Item"),
+							("[Goals_Conceded___Match]", "Attribute")},
+						{("[Teams]", BLANK()),
+							("ClusterId", "ClusterId")},
+						3
+					)
+				
+				RETURN __DataTransformT0
+				```
+			retainDataTillForceCalculate
+
+	annotation ClusterMappingTable = true
+
+	annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 4","ObjectType":4},"LinkType":"UsedInGroup"}]
+

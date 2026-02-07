@@ -1,0 +1,49 @@
+table TeamChoiceMap
+	lineageTag: 822cc7d5-9474-467d-8a87-05f1359e70e8
+
+	column Choice
+		lineageTag: 9de4dffb-2922-433d-9be4-3fdd4bf1cef6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Choice]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Team
+		lineageTag: eb360045-79df-4b49-9c52-56498430ed3b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Team]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition TeamChoiceMap = calculated
+		mode: import
+		source = ```
+				
+				VAR SelfMap =
+				    SELECTCOLUMNS (
+				        Team,
+				        "Choice", Team[Teams],
+				        "Team",   Team[Teams]
+				    )
+				VAR Top6Map =
+				    DATATABLE (
+				        "Choice", STRING,
+				        "Team",   STRING,
+				        {
+				            {"Top 6","Arsenal"},
+				            {"Top 6","Man United"},
+				            {"Top 6","Man City"},
+				            {"Top 6","Chelsea"},
+				            {"Top 6","Tottenham"},
+				            {"Top 6","Liverpool"}
+				        }
+				    )
+				RETURN
+				UNION ( SelfMap, Top6Map )
+				
+				```
+
+	annotation PBI_Id = 784296aa320e47f4a650e16d3a842864
+

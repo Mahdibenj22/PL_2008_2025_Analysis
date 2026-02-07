@@ -1,0 +1,49 @@
+table schema
+	isHidden
+	lineageTag: 88028475-e69e-44b1-ab21-fff20989b7fc
+
+	column Abbreviation
+		dataType: string
+		isHidden
+		lineageTag: 4909d5ad-5c87-49ec-b7bd-582e8ea16648
+		summarizeBy: none
+		sourceColumn: Abbreviation
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column FullForms
+		dataType: string
+		isHidden
+		lineageTag: bc719d45-734b-4a23-bdec-03a16653cef4
+		summarizeBy: none
+		sourceColumn: FullForms
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition schema = m
+		mode: import
+		source =
+				let
+				    Source = Json.Document(File.Contents("C:\Users\User\Downloads\PL_2009_2019\schema.json")),
+				    #"Converted to Table" = Table.FromRecords({Source}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Converted to Table",{{"fields", type any}, {"missingValues", type any}}),
+				    #"Expanded fields" = Table.ExpandListColumn(#"Changed Type", "fields"),
+				    #"Expanded fields1" = Table.ExpandRecordColumn(#"Expanded fields", "fields", {"name", "type", "format", "description"}, {"fields.name", "fields.type", "fields.format", "fields.description"}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Expanded fields1", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"Date", type text}, {"date", type text}, {"%d/%m/%y", type text}, {"Match Date (dd/mm/yy)", type text}, {"Column5", type any}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type1",{{"date", "date.1"}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Renamed Columns",{"date.1", "%d/%m/%y", "Column5"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Date", "Abbreviation"}, {"Match Date (dd/mm/yy)", "FullForms"}})
+				in
+				    #"Renamed Columns1"
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

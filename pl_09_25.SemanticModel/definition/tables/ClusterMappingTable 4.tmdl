@@ -1,0 +1,70 @@
+table 'ClusterMappingTable 4'
+	isHidden
+	isPrivate
+	lineageTag: 7f952058-f15e-4149-abc7-4e479f333718
+
+	column Teams
+		lineageTag: a7158f15-3dec-4da3-9918-64dda15ff9b4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Teams]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 5","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column ClusterId
+		formatString: 0
+		lineageTag: 43b9f1cb-c2f2-4491-9f71-d0906730184d
+		summarizeBy: count
+		isNameInferred
+		sourceColumn: [ClusterId]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 5","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	partition 'ClusterMappingTable 4' = calculated
+		mode: import
+		source = ```
+				VAR __DS0FilterTable = 
+					FILTER(
+						KEEPFILTERS(VALUES('Team'[Teams])),
+						NOT('Team'[Teams] IN {BLANK()})
+					)
+				
+				VAR __DS0Core = 
+					SUMMARIZECOLUMNS(
+						'Team'[Teams],
+						__DS0FilterTable,
+						"M_TotalShotsOnTarget", 'PL_2008_2025'[M TotalShotsOnTarget],
+						"Total_Goals", 'Team'[Total Goals],
+						"M_TotalShots", 'PL_2008_2025'[M TotalShots]
+					)
+				
+				VAR __DataTransformT0 = 
+					KMeansClustering(
+						SELECTCOLUMNS(
+							__DS0Core,
+							"Teams", 'Team'[Teams],
+							"M_TotalShotsOnTarget", [M_TotalShotsOnTarget],
+							"Total_Goals", [Total_Goals],
+							"M_TotalShots", [M_TotalShots]
+						),
+						{("[M_TotalShotsOnTarget]", "Attribute"),
+							("[Total_Goals]", "Attribute"),
+							("[Teams]", "Item"),
+							("[M_TotalShots]", "Attribute")},
+						{("[Teams]", BLANK()),
+							("ClusterId", "ClusterId")},
+						-1
+					)
+				
+				RETURN __DataTransformT0
+				```
+			retainDataTillForceCalculate
+
+	annotation ClusterMappingTable = true
+
+	annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 5","ObjectType":4},"LinkType":"UsedInGroup"}]
+

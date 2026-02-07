@@ -1,0 +1,23 @@
+relationship 3f92d438-6f25-137e-829f-cdde7b595d2b
+	fromColumn: PL_2008_2025.AwayTeam
+	toColumn: Team.Teams
+
+relationship ccc85dfb-c94d-b6f1-15f2-ba9ebefbb0dd
+	isActive: false
+	fromColumn: PL_2008_2025.HomeTeam
+	toColumn: Team.Teams
+
+relationship 63babef0-6a67-43a2-a663-2f17ba1308da
+	joinOnDateBehavior: datePartOnly
+	fromColumn: PL_2008_2025.Date
+	toColumn: LocalDateTable_82e71c33-c928-4efc-ad0d-a0098d3c5c3c.Date
+
+relationship 15232e38-28bd-5227-8c1c-68ce5d8d6a17
+	crossFilteringBehavior: bothDirections
+	fromColumn: TeamChoiceMap.Team
+	toColumn: Team.Teams
+
+relationship 7e157c15-95dc-8a82-cbca-9b7aef7daa66
+	fromColumn: TeamChoiceMap.Choice
+	toColumn: TeamChoice.Choice
+

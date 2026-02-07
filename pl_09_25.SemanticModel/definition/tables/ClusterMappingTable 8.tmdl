@@ -1,0 +1,70 @@
+table 'ClusterMappingTable 8'
+	isHidden
+	isPrivate
+	lineageTag: 21f50000-afed-4910-b576-1818b203e2fe
+
+	column Teams
+		lineageTag: 5d38b9aa-ef4e-4f4a-b0f8-77c934652d56
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Teams]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 9","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column ClusterId
+		formatString: 0
+		lineageTag: 22e44047-2082-45c3-960a-b41e2e2e5259
+		summarizeBy: count
+		isNameInferred
+		sourceColumn: [ClusterId]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 9","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	partition 'ClusterMappingTable 8' = calculated
+		mode: import
+		source = ```
+				VAR __DS0FilterTable = 
+					FILTER(
+						KEEPFILTERS(VALUES('Team'[Teams])),
+						NOT('Team'[Teams] IN {BLANK()})
+					)
+				
+				VAR __DS0Core = 
+					SUMMARIZECOLUMNS(
+						'Team'[Teams],
+						__DS0FilterTable,
+						"Shots_Per_Match", 'PL_2008_2025'[Shots Per Match],
+						"M_Shot_Accuracy", 'PL_2008_2025'[M Shot Accuracy],
+						"Goals_Per_Match", 'PL_2008_2025'[Goals Per Match]
+					)
+				
+				VAR __DataTransformT0 = 
+					KMeansClustering(
+						SELECTCOLUMNS(
+							__DS0Core,
+							"Teams", 'Team'[Teams],
+							"Shots_Per_Match", [Shots_Per_Match],
+							"M_Shot_Accuracy", [M_Shot_Accuracy],
+							"Goals_Per_Match", [Goals_Per_Match]
+						),
+						{("[Teams]", "Item"),
+							("[Shots_Per_Match]", "Attribute"),
+							("[M_Shot_Accuracy]", "Attribute"),
+							("[Goals_Per_Match]", "Attribute")},
+						{("[Teams]", BLANK()),
+							("ClusterId", "ClusterId")},
+						-1
+					)
+				
+				RETURN __DataTransformT0
+				```
+			retainDataTillForceCalculate
+
+	annotation ClusterMappingTable = true
+
+	annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 9","ObjectType":4},"LinkType":"UsedInGroup"}]
+

@@ -1,0 +1,39 @@
+table TeamChoice
+	lineageTag: 7048d0ec-a6b9-4f00-9ccb-c6741030e8de
+
+	column Choice
+		lineageTag: 4bc21075-37a6-4d99-9af9-5d10bbb2ae4c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Choice]
+		sortByColumn: SortKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column SortKey
+		lineageTag: 43aaa29a-ee02-49c5-9e3f-55e6d00ef3e3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [SortKey]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition TeamChoice = calculated
+		mode: import
+		source = ```
+				
+				VAR TeamList =
+				    SELECTCOLUMNS (
+				        Team,
+				        "Choice",  Team[Teams],
+				        "SortKey", "1_" & Team[Teams]
+				    )
+				VAR Top6 =
+				    ROW ( "Choice", "Top 6", "SortKey", "0_Top 6" )
+				RETURN
+				UNION ( Top6, TeamList )
+				
+				```
+
+	annotation PBI_Id = 32868f2d9ccd4c5ba477c58b101e5a78
+

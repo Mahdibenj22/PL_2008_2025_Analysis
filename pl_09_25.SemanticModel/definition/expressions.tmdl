@@ -1,0 +1,156 @@
+expression 'Sample File (2)' =
+		let
+		    Source = Folder.Files("C:\Users\User\Downloads\PL_2009_2019"),
+		    #"Filtered Rows" = Table.SelectRows(Source, each ([Name] <> "datapackage.json" and [Name] <> "README.md" and [Name] <> "schema.json")),
+		    Navigation1 = #"Filtered Rows"{0}[Content]
+		in
+		    Navigation1
+	lineageTag: 36cfd114-3168-4f71-9e85-f70d934beeae
+	queryGroup: 'Transform File from PL_2009_2019 (2)\Helper Queries'
+
+	annotation PBI_ResultType = Binary
+
+expression Parameter2 = #"Sample File (2)" meta [IsParameterQuery=true, BinaryIdentifier=#"Sample File (2)", Type="Binary", IsParameterQueryRequired=true]
+	lineageTag: cfc148d5-b186-4eae-83a1-9448f19a2626
+	queryGroup: 'Transform File from PL_2009_2019 (2)\Helper Queries'
+
+	annotation PBI_ResultType = Binary
+
+expression 'Transform Sample File (2)' =
+		let
+		    Source = Csv.Document(Parameter2,[Delimiter=",", Columns=22, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+		in
+		    #"Promoted Headers"
+	lineageTag: f5971e84-bdc7-4fa0-9c5c-b0a6637b3f71
+	queryGroup: 'Transform File from PL_2009_2019 (2)'
+
+	annotation PBI_ResultType = Table
+
+expression 'Transform File (2)' =
+		let
+		    Source = (Parameter2 as binary) => let
+		    Source = Csv.Document(Parameter2,[Delimiter=",", Columns=22, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+		in
+		    #"Promoted Headers"
+		in
+		    Source
+	mAttributes: [ FunctionQueryBinding = "{""exemplarFormulaName"":""Transform Sample File (2)""}" ]
+	lineageTag: df5f6f09-3915-4b52-944f-4682d40f7af8
+	queryGroup: 'Transform File from PL_2009_2019 (2)\Helper Queries'
+
+	annotation PBI_ResultType = Function
+
+expression 'Sample File' =
+		let
+		    Source = Folder.Files("C:\Users\User\Downloads\PL_2019_2025"),
+		    Navigation1 = Source{0}[Content]
+		in
+		    Navigation1
+	lineageTag: a2731085-b7f3-4813-8368-d7bddeb8ac47
+	queryGroup: 'Transform File from PL_2019_2025\Helper Queries'
+
+	annotation PBI_ResultType = Binary
+
+expression Parameter1 = #"Sample File" meta [IsParameterQuery=true, BinaryIdentifier=#"Sample File", Type="Binary", IsParameterQueryRequired=true]
+	lineageTag: 38bc447f-9cba-4660-8fc0-f3f4bfa19ed5
+	queryGroup: 'Transform File from PL_2019_2025\Helper Queries'
+
+	annotation PBI_ResultType = Binary
+
+expression 'Transform Sample File' =
+		let
+		    Source = Csv.Document(Parameter1,[Delimiter=",", Columns=106, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+		in
+		    #"Promoted Headers"
+	lineageTag: aa33abe9-8369-4196-8f37-5534ad46729b
+	queryGroup: 'Transform File from PL_2019_2025'
+
+	annotation PBI_ResultType = Table
+
+expression 'Transform File' =
+		let
+		    Source = (Parameter1 as binary) => let
+		    Source = Csv.Document(Parameter1,[Delimiter=",", Columns=106, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+		in
+		    #"Promoted Headers"
+		in
+		    Source
+	mAttributes: [ FunctionQueryBinding = "{""exemplarFormulaName"":""Transform Sample File""}" ]
+	lineageTag: 969df854-e407-4ddc-88ff-229e27deeac1
+	queryGroup: 'Transform File from PL_2019_2025\Helper Queries'
+
+	annotation PBI_ResultType = Function
+
+expression PL_2019_2025 =
+		let
+		    Source = Folder.Files("C:\Users\User\Downloads\PL_2019_2025"),
+		    #"Filtered Hidden Files1" = Table.SelectRows(Source, each [Attributes]?[Hidden]? <> true),
+		    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "Transform File", each #"Transform File"([Content])),
+		    #"Renamed Columns1" = Table.RenameColumns(#"Invoke Custom Function1", {"Name", "Source.Name"}),
+		    #"Removed Other Columns1" = Table.SelectColumns(#"Renamed Columns1", {"Source.Name", "Transform File"}),
+		    #"Expanded Table Column1" = Table.ExpandTableColumn(#"Removed Other Columns1", "Transform File", Table.ColumnNames(#"Transform File"(#"Sample File"))),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Table Column1",{{"Source.Name", type text}, {"Div", type text}, {"Date", type text}, {"Time", type time}, {"HomeTeam", type text}, {"AwayTeam", type text}, {"FTHG", Int64.Type}, {"FTAG", Int64.Type}, {"FTR", type text}, {"HTHG", Int64.Type}, {"HTAG", Int64.Type}, {"HTR", type text}, {"Referee", type text}, {"HS", Int64.Type}, {"AS", Int64.Type}, {"HST", Int64.Type}, {"AST", Int64.Type}, {"HF", Int64.Type}, {"AF", Int64.Type}, {"HC", Int64.Type}, {"AC", Int64.Type}, {"HY", Int64.Type}, {"AY", Int64.Type}, {"HR", Int64.Type}, {"AR", Int64.Type}, {"B365H", type number}, {"B365D", type number}, {"B365A", type number}, {"BWH", type number}, {"BWD", type number}, {"BWA", type number}, {"IWH", type number}, {"IWD", type number}, {"IWA", type number}, {"PSH", type number}, {"PSD", type number}, {"PSA", type number}, {"WHH", type number}, {"WHD", type number}, {"WHA", type number}, {"VCH", type number}, {"VCD", type number}, {"VCA", type number}, {"MaxH", type number}, {"MaxD", type number}, {"MaxA", type number}, {"AvgH", type number}, {"AvgD", type number}, {"AvgA", type number}, {"B365>2.5", type number}, {"B365<2.5", type number}, {"P>2.5", type number}, {"P<2.5", type number}, {"Max>2.5", type number}, {"Max<2.5", type number}, {"Avg>2.5", type number}, {"Avg<2.5", type number}, {"AHh", type number}, {"B365AHH", type number}, {"B365AHA", type number}, {"PAHH", type number}, {"PAHA", type number}, {"MaxAHH", type number}, {"MaxAHA", type number}, {"AvgAHH", type number}, {"AvgAHA", type number}, {"B365CH", type number}, {"B365CD", type number}, {"B365CA", type number}, {"BWCH", type number}, {"BWCD", type number}, {"BWCA", type number}, {"IWCH", type number}, {"IWCD", type number}, {"IWCA", type number}, {"PSCH", type number}, {"PSCD", type number}, {"PSCA", type number}, {"WHCH", type number}, {"WHCD", type number}, {"WHCA", type number}, {"VCCH", type number}, {"VCCD", type number}, {"VCCA", type number}, {"MaxCH", type number}, {"MaxCD", type number}, {"MaxCA", type number}, {"AvgCH", type number}, {"AvgCD", type number}, {"AvgCA", type number}, {"B365C>2.5", type number}, {"B365C<2.5", type number}, {"PC>2.5", type number}, {"PC<2.5", type number}, {"MaxC>2.5", type number}, {"MaxC<2.5", type number}, {"AvgC>2.5", type number}, {"AvgC<2.5", type number}, {"AHCh", type number}, {"B365CAHH", type number}, {"B365CAHA", type number}, {"PCAHH", type number}, {"PCAHA", type number}, {"MaxCAHH", type number}, {"MaxCAHA", type number}, {"AvgCAHH", type number}, {"AvgCAHA", type number}}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"FTHG", "Full Time Home Goal"}, {"FTAG", "Full Time Away Goal"}, {"FTR", "Full Time Result"}, {"HTHG", "Half Time Home Goal"}, {"HTAG", "Halft Time Away Goal"}, {"HTR", "Half Time Result"}, {"HS", "Home Team Shots"}, {"AS", "Away Team Shots"}, {"HST", "Home Team Shots On Target"}, {"AST", "Away Team Shots On Target"}, {"HF", "Home Team Fouls Committed"}, {"AF", "Away Team Fouls Committed"}, {"HC", "Home Team Corners"}, {"AC", "Away Team Corners"}, {"HY", "Home Team Yellow Cards"}, {"AY", "Away Team Yellow Cards"}, {"HR", "Home Team Red Cards"}, {"AR", "Away Team Red Cards"}}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Renamed Columns",{"B365C<2.5", "PC>2.5", "PC<2.5", "MaxC>2.5", "MaxC<2.5", "AvgC>2.5", "AvgC<2.5", "AHCh", "B365CAHH", "B365CAHA", "PCAHH", "PCAHA", "AvgCA", "B365C>2.5", "MaxCAHH", "MaxCAHA", "AvgCAHH", "AvgCAHA", "VCCA", "MaxCH", "MaxCD", "MaxCA", "AvgCH", "AvgCD", "PSCA", "WHCH", "WHCD", "WHCA", "VCCH", "VCCD", "BWCA", "IWCH", "IWCD", "IWCA", "PSCH", "PSCD", "AvgAHA", "B365CH", "B365CD", "B365CA", "BWCH", "BWCD", "B365AHA", "PAHH", "PAHA", "MaxAHH", "MaxAHA", "AvgAHH", "Max>2.5", "Max<2.5", "Avg>2.5", "Avg<2.5", "AHh", "B365AHH", "AvgD", "AvgA", "B365>2.5", "B365<2.5", "P>2.5", "P<2.5", "VCD", "VCA", "MaxH", "MaxD", "MaxA", "AvgH", "PSD", "PSA", "WHH", "WHD", "WHA", "VCH", "BWH", "BWD", "BWA", "IWH", "IWD", "IWA", "PSH", "B365H", "B365D", "B365A", "Div", "Time"}),
+		    #"Extracted Text Between Delimiters" = Table.TransformColumns(#"Removed Columns", {{"Source.Name", each Text.BetweenDelimiters(_, "-", "."), type text}}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Extracted Text Between Delimiters", "Season", each if Text.StartsWith([Source.Name], "19") then "19/20" else if Text.StartsWith([Source.Name], "20") then "20/21" else if Text.StartsWith([Source.Name], "21") then "21/22" else if Text.StartsWith([Source.Name], "22") then "22/23" else if Text.StartsWith([Source.Name], "23") then "23/24" else if Text.StartsWith([Source.Name], "24") then "24/25" else null),
+		    #"Filtered Rows" = Table.SelectRows(#"Added Conditional Column", each true),
+		    #"Removed Columns1" = Table.RemoveColumns(#"Filtered Rows",{"Source.Name"}),
+		    #"Renamed Columns2" = Table.RenameColumns(#"Removed Columns1",{{"Halft Time Away Goal", "Half Time Away Goal"}})
+		in
+		    #"Renamed Columns2"
+	lineageTag: 6af0816f-6c14-45d7-b6e6-06a0b357a98a
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression PL_2009_2019 =
+		let
+		    Source = Folder.Files("C:\Users\User\Downloads\PL_2009_2019"),
+		    #"Filtered Rows" = Table.SelectRows(Source, each ([Name] <> "datapackage.json" and [Name] <> "README.md" and [Name] <> "schema.json")),
+		    #"Filtered Hidden Files1" = Table.SelectRows(#"Filtered Rows", each [Attributes]?[Hidden]? <> true),
+		    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "Transform File (2)", each #"Transform File (2)"([Content])),
+		    #"Renamed Columns1" = Table.RenameColumns(#"Invoke Custom Function1", {"Name", "Source.Name"}),
+		    #"Removed Other Columns1" = Table.SelectColumns(#"Renamed Columns1", {"Source.Name", "Transform File (2)"}),
+		    #"Expanded Table Column1" = Table.ExpandTableColumn(#"Removed Other Columns1", "Transform File (2)", Table.ColumnNames(#"Transform File (2)"(#"Sample File (2)"))),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Table Column1",{{"Source.Name", type text}, {"Date", type text}, {"HomeTeam", type text}, {"AwayTeam", type text}, {"FTHG", Int64.Type}, {"FTAG", Int64.Type}, {"FTR", type text}, {"HTHG", Int64.Type}, {"HTAG", Int64.Type}, {"HTR", type text}, {"Referee", type text}, {"HS", Int64.Type}, {"AS", Int64.Type}, {"HST", Int64.Type}, {"AST", Int64.Type}, {"HF", Int64.Type}, {"AF", Int64.Type}, {"HC", Int64.Type}, {"AC", Int64.Type}, {"HY", Int64.Type}, {"AY", Int64.Type}, {"HR", Int64.Type}, {"AR", Int64.Type}}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"FTHG", "Full Time Home Goal"}, {"FTAG", "Full Time Away Goal"}, {"FTR", "FULL TIME RESULT"}, {"HTHG", "HALF TIME HOME GOAL"}, {"HTAG", "Half Time Away Goal"}, {"HTR", "Half Time Result"}, {"HS", "Home Team Shots"}, {"AS", "Away Team Shots"}, {"HST", "Home Team Shots On Target"}, {"AST", "Away Team Shots On Target"}, {"HC", "Home Team Corners"}, {"AC", "Away Team Corners"}, {"HY", "Home Team Yellow Cards"}, {"AY", "Away Team Yellow Cards"}, {"HF", "Home Team Fouls Committed"}, {"AF", "Away Team Fouls Commited"}, {"HR", "Home Team Red Card"}, {"AR", "AwayTeam Red Card"}}),
+		    #"Split Column by Positions" = Table.SplitColumn(#"Renamed Columns", "Source.Name", Splitter.SplitTextByPositions({7}), {"Source.Name.1"}),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Positions",{{"Source.Name.1", type text}}),
+		    #"Split Column by Delimiter" = Table.SplitColumn(#"Changed Type1", "Source.Name.1", Splitter.SplitTextByDelimiter(".", QuoteStyle.Csv), {"Source.Name.1.1", "Source.Name.1.2"}),
+		    #"Changed Type2" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Source.Name.1.1", Int64.Type}, {"Source.Name.1.2", type text}}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Changed Type2",{"Source.Name.1.2"}),
+		    #"Sorted Rows" = Table.Sort(#"Removed Columns",{{"HomeTeam", Order.Ascending}}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Sorted Rows", "Custom", each if [Source.Name.1.1] = 1415 then "14/15" else if [Source.Name.1.1] = 910 then "09/10" else if [Source.Name.1.1] = 1213 then "12/13" else if [Source.Name.1.1] = 1112 then "11/12" else if [Source.Name.1.1] = 1011 then "10/11" else if [Source.Name.1.1] = 1617 then "16/17" else if [Source.Name.1.1] = 1516 then "15/16" else if [Source.Name.1.1] = 1314 then "13/14" else if [Source.Name.1.1] = 1718 then "17/18" else if [Source.Name.1.1] = 1819 then "18/19" else null, type text),
+		    #"Removed Columns1" = Table.RemoveColumns(#"Added Conditional Column",{"Source.Name.1.1"}),
+		    #"Renamed Columns2" = Table.RenameColumns(#"Removed Columns1",{{"Custom", "Season"}, {"FULL TIME RESULT", "Full Time Result"}, {"HALF TIME HOME GOAL", "Half Time Home Goal"}, {"Away Team Fouls Commited", "Away Team Fouls Committed"}, {"Home Team Red Card", "Home Team Red Cards"}, {"AwayTeam Red Card", "Away Team Red Cards"}})
+		in
+		    #"Renamed Columns2"
+	lineageTag: 2d35f230-489c-4126-be45-062e7f9e50ac
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression season-0809 =
+		let
+		    Source = Csv.Document(File.Contents("C:\Users\User\Downloads\season-0809.csv"),[Delimiter=",", Columns=23, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Date", type text}, {"HomeTeam", type text}, {"AwayTeam", type text}, {"Full Time Home Goal", Int64.Type}, {"Full Time Away Goal", Int64.Type}, {"Full Time Result", type text}, {"Half Time Home Goal", Int64.Type}, {"Half Time Away Goal", Int64.Type}, {"Half Time Result", type text}, {"Referee", type text}, {"Home Team Shots", Int64.Type}, {"Away Team Shots", Int64.Type}, {"Home Team Shots On Target", Int64.Type}, {"Away Team Shots On Target", Int64.Type}, {"Home Team Fouls Committed", Int64.Type}, {"Away Team Fouls Committed", Int64.Type}, {"Home Team Corners", Int64.Type}, {"Away Team Corners", Int64.Type}, {"Home Team Yellow Cards", Int64.Type}, {"Away Team Yellow Cards", Int64.Type}, {"Home Team Red Cards", Int64.Type}, {"Away Team Red Cards", Int64.Type}, {"", type text}}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"", "Season"}}),
+		    #"Added Custom" = Table.AddColumn(#"Renamed Columns", "Season.1", each "08/09"),
+		    #"Removed Columns" = Table.RemoveColumns(#"Added Custom",{"Season"}),
+		    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Season.1", "Season"}})
+		in
+		    #"Renamed Columns1"
+	lineageTag: 7116abd7-2b61-4eed-9453-5290448f2f23
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

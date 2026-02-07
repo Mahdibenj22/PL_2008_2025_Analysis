@@ -1,0 +1,689 @@
+table PL_2008_2025
+	lineageTag: b0c920bf-7ad0-4e34-bf57-0ecebaa5c9d3
+
+	measure 'M HomeStrongTeam' = CALCULATE(COUNTA(PL_2008_2025[HomeTeam]),PL_2008_2025[FULL TIME RESULT] = "H" ,USERELATIONSHIP(PL_2008_2025[HomeTeam],Team[Teams]))
+		formatString: 0
+		lineageTag: 32b50422-9fd7-423b-9972-ff63390f3942
+
+	measure 'M AwayStrongTeam' = ```
+			CALCULATE(COUNTA(PL_2008_2025[AwayTeam]),PL_2008_2025[FULL TIME RESULT] = "A" ,USERELATIONSHIP(PL_2008_2025[AwayTeam],Team[Teams]))
+			
+			```
+		lineageTag: 4d5e37f3-9005-43ca-8033-db492ff48888
+
+	measure TotalWins = [M AwayStrongTeam]+[M HomeStrongTeam]
+		formatString: 0
+		lineageTag: c5f37b0e-19c3-41d7-9868-ba64671bde73
+
+	measure 'M AvgGoalPerMatch' = DIVIDE([Total Goals],[Total Matches])
+		lineageTag: 4a9d328e-18aa-4c2a-b6f1-57052a94c52d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'M HighestGoalScoringTeam' = CALCULATE(SELECTEDVALUE(PL_2008_2025[M FTWinTeam]),ALL(PL_2008_2025),TOPN(1,PL_2008_2025,[Total Goals],DESC))
+		lineageTag: 5ecc2eb8-a85c-4a58-a4cd-2c57ebb49ff3
+
+	measure 'M HighestConcededTeam' = ```
+			
+			VAR TeamsList = DISTINCT(PL_2008_2025[HomeTeam]) -- Creates a unique list of all teams
+			RETURN
+			CALCULATE(
+			    SELECTEDVALUE(PL_2008_2025[HomeTeam]),
+			    TOPN(
+			        1, 
+			        TeamsList, 
+			        -- This expression calculates conceded goals for each team in the list
+			        VAR CurrentTeam = PL_2008_2025[HomeTeam]
+			        RETURN
+			        CALCULATE(SUM(PL_2008_2025[Full Time Away Goal]), PL_2008_2025[HomeTeam] = CurrentTeam) + 
+			        CALCULATE(SUM(PL_2008_2025[Full Time Home Goal]), PL_2008_2025[AwayTeam] = CurrentTeam),
+			        DESC
+			    )
+			)
+			```
+		lineageTag: 87db41ef-e217-498e-9e97-ef8e13db03b8
+
+	measure 'M TotalShotsOnTarget' =
+			
+			var HomeShorts  =Calculate(SUM(PL_2008_2025[Home Team Shots On Target]),USERELATIONSHIP(PL_2008_2025[HomeTeam],Team[Teams]))
+			RETURN
+			IF(ISFILTERED(Team[Teams]),HomeShorts+Sum(PL_2008_2025[Away Team Shots On Target]),HomeShorts+Sum(PL_2008_2025[Away Team Shots On Target]))
+		formatString: 0
+		lineageTag: 4c409c71-46c3-4e1c-a230-15febd08e34b
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 5","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 6","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'M TotalShots' =
+			
+			var HomeShorts  =Calculate(SUM(PL_2008_2025[Home Team Shots]),USERELATIONSHIP(PL_2008_2025[HomeTeam],Team[Teams]))
+			RETURN
+			IF(ISFILTERED(Team[Teams]),HomeShorts+Sum(PL_2008_2025[Away Team Shots]),HomeShorts+Sum(PL_2008_2025[Away Team Shots]))
+		formatString: 0
+		lineageTag: 2cd3aaaf-eefb-470f-aab3-a16d686a76cf
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 5","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 6","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'M TotalCorners' =
+			
+			var HomeShorts  =Calculate(SUM(PL_2008_2025[Home Team Corners]),USERELATIONSHIP(PL_2008_2025[HomeTeam],Team[Teams]))
+			RETURN
+			IF(ISFILTERED(Team[Teams]),HomeShorts+Sum(PL_2008_2025[Away Team Corners]),HomeShorts+Sum(PL_2008_2025[Away Team Corners]))
+		formatString: 0
+		lineageTag: a7e6aa6f-7353-4c84-917a-f150cb2e03ec
+
+	measure 'M TotalFouls' = ```
+			
+			var HomeFouls = CALCULATE(SUM(PL_2008_2025[Home Team Fouls Committed]),USERELATIONSHIP(Team[Teams],PL_2008_2025[HomeTeam]))
+			RETURN
+			IF(ISFILTERED(Team[Teams]),HomeFouls+SUM(PL_2008_2025[Away Team Fouls Committed]),SUM(PL_2008_2025[Away Team Fouls Committed])) 
+			```
+		formatString: 0
+		lineageTag: 6f3688dc-12dc-447f-a65c-bfcfe858772e
+
+	measure 'M HighestScoringTeam' = ```
+			
+			VAR HomeGoals = 
+			    SELECTCOLUMNS(PL_2008_2025, "TeamName", [HomeTeam], "Goals", [Full Time Home Goal])
+			VAR AwayGoals = 
+			    SELECTCOLUMNS(PL_2008_2025, "TeamName", [AwayTeam], "Goals", [Full Time Away Goal])
+			VAR AllGoals = 
+			    UNION(HomeGoals, AwayGoals)
+			VAR TeamSummary = 
+			    GROUPBY(
+			        AllGoals, 
+			        [TeamName], 
+			        "TotalGoals", SUMX(CURRENTGROUP(), [Goals])
+			    )
+			RETURN 
+			    MAXX(
+			        TOPN(1, TeamSummary, [TotalGoals], DESC), 
+			        [TeamName]
+			    )
+			```
+		lineageTag: b5ad3738-d9c7-440b-9b04-f6151e2f186d
+
+	measure 'M Shot Accuracy' = ```
+			DIVIDE(PL_2008_2025[M TotalShotsOnTarget],PL_2008_2025[M TotalShots]) 
+			
+			
+			```
+		lineageTag: 88f5d890-840e-46cd-93fc-c47dffb92899
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters)","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Shots Accuracy & Finishing Clusters","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 7","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 8","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 9","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'M Finishing' = DIVIDE(Team[Total Goals],PL_2008_2025[M TotalShotsOnTarget])
+		lineageTag: 54b71d4d-1c48-45f5-b183-19778a28dfc9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters)","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Shots Accuracy & Finishing Clusters","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'Home Points' = ```
+			
+			SUMX(
+			    PL_2008_2025,
+			    SWITCH(
+			        PL_2008_2025[FULL TIME RESULT],
+			        "H", 3,
+			        "D", 1,
+			        0
+			    )
+			)
+			
+			```
+		formatString: 0
+		lineageTag: 814ad2a2-8fde-4ec9-98a2-85818ebff943
+
+	measure 'Away Points' = ```
+			
+			SUMX(
+			    PL_2008_2025,
+			    SWITCH(
+			        PL_2008_2025[FULL TIME RESULT],
+			        "A", 3,
+			        "D", 1,
+			        0
+			    )
+			)
+			
+			```
+		formatString: 0
+		lineageTag: 85040ba5-4704-4ea3-bbe6-8283f1da339e
+
+	measure 'Team Points' =
+			
+			CALCULATE( [Home Points], USERELATIONSHIP(PL_2008_2025[HomeTeam], Team[Teams]) )
+			+
+			CALCULATE( [Away Points], USERELATIONSHIP(PL_2008_2025[AwayTeam], Team[Teams]) )
+		formatString: 0
+		lineageTag: c7bec8ef-595b-49c4-84b9-f8db667ea24a
+
+	measure 'Home Matches' = COUNTROWS(PL_2008_2025)
+		formatString: 0
+		lineageTag: 8cd08ee6-1b45-45f1-8623-277a4e941ca5
+
+	measure 'Away Matches' = COUNTROWS(PL_2008_2025)
+		formatString: 0
+		lineageTag: 2fc27769-fb57-45ca-8537-76c499567382
+
+	measure 'Team Matches' =
+			
+			VAR T = VALUES(Team[Teams])
+			RETURN
+			CALCULATE( COUNTROWS(PL_2008_2025), TREATAS(T, PL_2008_2025[HomeTeam]) )
+			+
+			CALCULATE( COUNTROWS(PL_2008_2025), TREATAS(T, PL_2008_2025[AwayTeam]) )
+		formatString: 0
+		lineageTag: b478d648-a6c5-4bc6-ade9-7399948ce1d8
+
+	measure 'Team PPG' = DIVIDE([Team Points], [Team Matches])
+		lineageTag: 5aee4a87-9ed3-452f-97bc-7ca80e1d1e1e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Home PPG' =
+			
+			DIVIDE(
+			    CALCULATE( [Home Points], USERELATIONSHIP(PL_2008_2025[HomeTeam], Team[Teams]) ),
+			    CALCULATE( COUNTROWS(PL_2008_2025), USERELATIONSHIP(PL_2008_2025[HomeTeam], Team[Teams]) )
+			)
+		lineageTag: 54e21899-9179-484f-b669-793625994dfe
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Away PPG' =
+			
+			DIVIDE(
+			    CALCULATE( [Away Points], USERELATIONSHIP(PL_2008_2025[AwayTeam], Team[Teams]) ),
+			    CALCULATE( COUNTROWS(PL_2008_2025), USERELATIONSHIP(PL_2008_2025[AwayTeam], Team[Teams]) )
+			)
+		lineageTag: 40b94e68-de6f-42d4-a369-81ccac5b249d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'FT Home Points' =
+			
+			SUMX(
+			    PL_2008_2025,
+			    SWITCH(PL_2008_2025[FULL TIME RESULT], "H", 3, "D", 1, 0)
+			)
+		formatString: 0
+		lineageTag: 84954ac4-173c-4413-a90f-a1d5f652f7ff
+
+	measure 'FT Away Points' =
+			
+			SUMX(
+			    PL_2008_2025,
+			    SWITCH(PL_2008_2025[FULL TIME RESULT], "A", 3, "D", 1, 0)
+			)
+		formatString: 0
+		lineageTag: f2b1c48d-3ede-4061-8cfe-25da5488413f
+
+	measure 'HT Home Points (Expected)' =
+			
+			SUMX(
+			    PL_2008_2025,
+			    SWITCH(PL_2008_2025[Half Time Result], "H", 3, "D", 1, 0)
+			)
+		formatString: 0
+		lineageTag: 23c87b51-5769-46ca-b246-79d8bcc2aba9
+
+	measure 'HT Away Points (Expected)' =
+			
+			SUMX(
+			    PL_2008_2025,
+			    SWITCH(PL_2008_2025[Half Time Result], "A", 3, "D", 1, 0)
+			)
+		formatString: 0
+		lineageTag: 0fe3cdfe-160d-4fc2-8ed7-2951dc71c04c
+
+	measure 'Home Points Swing' = [FT Home Points] - [HT Home Points (Expected)]
+		formatString: 0
+		lineageTag: 65c68f35-6eb7-4d41-9034-3b0272ee83d1
+
+	measure 'Away Points Swing' = [FT Away Points] - [HT Away Points (Expected)]
+		formatString: 0
+		lineageTag: b252fcb9-a45c-43a4-8087-6863e6eae87f
+
+	measure 'Team Points Swing' =
+			
+			VAR T = VALUES(Team[Teams])
+			RETURN
+			CALCULATE( [Home Points Swing], TREATAS(T, PL_2008_2025[AwayTeam]) )
+			+
+			CALCULATE( [Away Points Swing], TREATAS(T, PL_2008_2025[HomeTeam]) )
+		formatString: 0
+		lineageTag: 591208d4-8831-4c5e-b042-438ec3ac8d8b
+
+	measure 'Home Clean Sheets' =
+			
+			SUMX( PL_2008_2025, IF( PL_2008_2025[Full Time Away Goal] = 0, 1, 0 ) )
+		formatString: 0
+		lineageTag: ea4d569e-df24-4a34-b8ca-90b26920c285
+
+	measure 'Away Clean Sheets' =
+			
+			SUMX( PL_2008_2025, IF( PL_2008_2025[Full Time Home Goal] = 0, 1, 0 ) )
+		formatString: 0
+		lineageTag: 5f521838-6591-42cf-8b1c-de4b6352d28a
+
+	measure 'Team Clean Sheets' =
+			
+			VAR T = VALUES(Team[Teams])
+			RETURN
+			CALCULATE( [Home Clean Sheets], TREATAS(T, PL_2008_2025[HomeTeam]) )
+			+
+			CALCULATE( [Away Clean Sheets], TREATAS(T, PL_2008_2025[AwayTeam]) )
+		formatString: 0
+		lineageTag: 285c9b25-fa5e-49c4-b2a0-02a498e54391
+
+	measure 'Clean Sheet %' =
+			
+			DIVIDE( [Team Clean Sheets], [Team Matches] )
+		lineageTag: 38c22e30-c358-4fd9-8691-0e27e443ef6a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Yellow / Match' = DIVIDE( [Total Yellow Cards], [Team Matches] )
+		lineageTag: 865638a4-ef40-4d53-a793-a93bbc61d779
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 2","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Cards","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'Red / Match' = DIVIDE( [Total Red Cards], [Team Matches] )
+		lineageTag: c2238129-46ba-4da0-acdf-8ea3c37d750b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 2","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Cards","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'Aggression Index' = [Yellow / Match] + 3 * [Red / Match]
+		lineageTag: 800c7619-181d-44b1-a43d-9d27bebbe45b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Home Goals Conceded' =
+			
+			SUM( PL_2008_2025[Full Time Away Goal] )
+		formatString: 0
+		lineageTag: b0bb3130-7962-40bd-af4d-42082c69dd5c
+
+	measure 'Away Goals Conceded' = ```
+			SUM( PL_2008_2025[Full Time Home Goal] )
+			
+			```
+		formatString: 0
+		lineageTag: 3110499e-5a8f-449c-a373-b7636bf6fdca
+
+	measure 'Team Goals Conceded' =
+			
+			VAR T = VALUES(Team[Teams])
+			RETURN
+			CALCULATE( [Home Goals Conceded], TREATAS(T, PL_2008_2025[HomeTeam]) )
+			+
+			CALCULATE( [Away Goals Conceded], TREATAS(T, PL_2008_2025[AwayTeam]) )
+		formatString: 0
+		lineageTag: 9c1bb4ce-4ffd-481c-ad66-d2c3fb6f1e16
+
+	measure 'Goals Conceded / Match' =
+			
+			DIVIDE( [Team Goals Conceded], [Team Matches] )
+		lineageTag: b7848670-b01d-42df-928b-f36a0793a428
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 3","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 4","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'Home SOT Conceded' =
+			
+			SUM( PL_2008_2025[Away Team Shots On Target] )
+		formatString: 0
+		lineageTag: f7ffa7c4-f327-4fa9-9668-32de0317fc1f
+
+	measure 'Away SOT Conceded' =
+			
+			SUM( PL_2008_2025[Home Team Shots On Target] )
+		formatString: 0
+		lineageTag: b3a09ab9-53d2-454c-955a-9e1e668e7e5d
+
+	measure 'Team SOT Conceded' =
+			
+			VAR T = VALUES(Team[Teams])
+			RETURN
+			CALCULATE( [Home SOT Conceded], TREATAS(T, PL_2008_2025[HomeTeam]) )
+			+
+			CALCULATE( [Away SOT Conceded], TREATAS(T, PL_2008_2025[AwayTeam]) )
+		formatString: 0
+		lineageTag: a13b2651-4fd0-470c-b8bc-b4a8b949e331
+
+	measure 'SOT Conceded / Match' =
+			
+			DIVIDE( [Team SOT Conceded], [Team Matches] )
+		lineageTag: 5e6b858c-9fa2-460c-a462-9ab94e8dce34
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 3","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 4","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'Goals Conceded / Match average per Teams' =
+			
+			AVERAGEX(
+				KEEPFILTERS(VALUES('Team'[Teams])),
+				CALCULATE([Goals Conceded / Match])
+			)
+		lineageTag: 67818ca2-254c-40f2-9beb-9b9c307a8995
+
+		extendedProperty MeasureTemplate =
+				{
+				  "version": 0,
+				  "daxTemplateName": "AveragePerCategory"
+				}
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Team Points Per Match' = [Team Points] / Team[Total Matches]
+		lineageTag: 911b218e-9bfd-4c36-a5d0-4ff4ef4c6c57
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shots Per Match' = PL_2008_2025[M TotalShots] / Team[Total Matches]
+		lineageTag: d79f952b-8a04-4c27-a103-a02507dcf3b2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 7","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 8","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 9","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	measure 'Goals Per Match'
+		lineageTag: bc8d5170-ce28-40c8-a989-8809d0748cd0
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 7","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 8","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 9","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 44869042-b666-416d-bc2c-72e46f549ff3
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: 63babef0-6a67-43a2-a663-2f17ba1308da
+			defaultHierarchy: LocalDateTable_82e71c33-c928-4efc-ad0d-a0098d3c5c3c.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column HomeTeam
+		dataType: string
+		lineageTag: 4b57f33c-b27a-487d-93eb-0cf9b596d864
+		summarizeBy: none
+		sourceColumn: HomeTeam
+
+		annotation SummarizationSetBy = Automatic
+
+	column AwayTeam
+		dataType: string
+		lineageTag: 86c492bb-8f39-4133-acd8-7983002dd85e
+		summarizeBy: none
+		sourceColumn: AwayTeam
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Full Time Home Goal'
+		dataType: int64
+		formatString: 0
+		lineageTag: e9db7161-b89a-43e9-b18c-1b4e3ced4d40
+		summarizeBy: sum
+		sourceColumn: Full Time Home Goal
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Full Time Away Goal'
+		dataType: int64
+		formatString: 0
+		lineageTag: 46c3e461-94ef-4158-b739-daf93543c31b
+		summarizeBy: sum
+		sourceColumn: Full Time Away Goal
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Full Time Result'
+		dataType: string
+		lineageTag: feac5615-1552-42f0-b3e4-ad9bb89e5afd
+		summarizeBy: none
+		sourceColumn: Full Time Result
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Half Time Home Goal'
+		dataType: int64
+		formatString: 0
+		lineageTag: 514a6ee4-a313-4a85-b3b4-c2f0a6fa910b
+		summarizeBy: sum
+		sourceColumn: Half Time Home Goal
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Half Time Away Goal'
+		dataType: int64
+		formatString: 0
+		lineageTag: 10c39290-e28b-479b-b101-cb6b4ce9ee3c
+		summarizeBy: sum
+		sourceColumn: Half Time Away Goal
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Half Time Result'
+		dataType: string
+		lineageTag: 6d32ebb5-c977-4b25-84ce-e2b335a862b7
+		summarizeBy: none
+		sourceColumn: Half Time Result
+
+		annotation SummarizationSetBy = Automatic
+
+	column Referee
+		dataType: string
+		lineageTag: db97ae43-a1ca-48ad-a8d3-6519e4d56df2
+		summarizeBy: none
+		sourceColumn: Referee
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Home Team Shots'
+		dataType: int64
+		formatString: 0
+		lineageTag: 0dbf5183-0e09-4c57-b4a2-d5e23252c06f
+		summarizeBy: sum
+		sourceColumn: Home Team Shots
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Away Team Shots'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9242e158-8a28-4890-95e2-8e851b887cdf
+		summarizeBy: sum
+		sourceColumn: Away Team Shots
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Home Team Shots On Target'
+		dataType: int64
+		formatString: 0
+		lineageTag: 2f4090bb-0edd-4755-b11e-1c58b9f0eb19
+		summarizeBy: sum
+		sourceColumn: Home Team Shots On Target
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Away Team Shots On Target'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1d534887-f5ec-4836-9e5a-97758e80290e
+		summarizeBy: sum
+		sourceColumn: Away Team Shots On Target
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Home Team Fouls Committed'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9592aa46-b0a4-4051-86c6-10db38624123
+		summarizeBy: sum
+		sourceColumn: Home Team Fouls Committed
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Away Team Fouls Committed'
+		dataType: int64
+		formatString: 0
+		lineageTag: a1c68027-f6e2-4c35-914e-303d33c1a757
+		summarizeBy: sum
+		sourceColumn: Away Team Fouls Committed
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Home Team Corners'
+		dataType: int64
+		formatString: 0
+		lineageTag: 64dcd6cf-9222-4372-b189-7a387959de3c
+		summarizeBy: sum
+		sourceColumn: Home Team Corners
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Away Team Corners'
+		dataType: int64
+		formatString: 0
+		lineageTag: 306dd8e6-5ef8-4c99-876e-309c1be432c7
+		summarizeBy: sum
+		sourceColumn: Away Team Corners
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Home Team Yellow Cards'
+		dataType: int64
+		formatString: 0
+		lineageTag: 4311c47d-4c06-4943-a039-0e05122060de
+		summarizeBy: sum
+		sourceColumn: Home Team Yellow Cards
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Away Team Yellow Cards'
+		dataType: int64
+		formatString: 0
+		lineageTag: d776d181-82af-4e66-b072-89d0e9c2b1f6
+		summarizeBy: sum
+		sourceColumn: Away Team Yellow Cards
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Home Team Red Cards'
+		dataType: int64
+		formatString: 0
+		lineageTag: cba45a1e-9368-4bf9-b8a5-3ce7db10731a
+		summarizeBy: sum
+		sourceColumn: Home Team Red Cards
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Away Team Red Cards'
+		dataType: int64
+		formatString: 0
+		lineageTag: 6cf829f1-ee74-42f8-be60-1c6fd438ac68
+		summarizeBy: sum
+		sourceColumn: Away Team Red Cards
+
+		annotation SummarizationSetBy = Automatic
+
+	column Season
+		dataType: string
+		lineageTag: 819af641-3065-4663-8809-de375ac42e27
+		summarizeBy: none
+		sourceColumn: Season
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'M TotalGoalCol' = PL_2008_2025[Full Time Away Goal]+PL_2008_2025[Full Time Home Goal]
+		formatString: 0
+		lineageTag: b4ccc85e-fa4a-4839-abbe-a9ff1f7b1431
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'M FTTotalGoal' = PL_2008_2025[Full Time Away Goal] + PL_2008_2025[Full Time Home Goal]
+		formatString: 0
+		lineageTag: 318906f4-3f31-43be-8691-690f327d8249
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'M FTWinTeam' = IF(PL_2008_2025[Full Time Away Goal]>PL_2008_2025[Full Time Home Goal],PL_2008_2025[AwayTeam],IF(PL_2008_2025[Full Time Away Goal]<PL_2008_2025[Full Time Home Goal],PL_2008_2025[HomeTeam],"draw") )
+		lineageTag: 0d84c301-8fa5-4a3b-80a1-9436dd1bc96f
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'M HighGoqlDiff' = ABS(PL_2008_2025[Full Time Away Goal]-PL_2008_2025[Full Time Home Goal])
+		formatString: 0
+		lineageTag: 824d8ac9-9f82-47c4-8207-fad72518b5ac
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'M HTWinTeam' = IF(PL_2008_2025[Half Time Away Goal]>PL_2008_2025[Half Time Home Goal],PL_2008_2025[AwayTeam],IF(PL_2008_2025[Half Time Away Goal]<PL_2008_2025[Half Time Home Goal],PL_2008_2025[HomeTeam],"draw") )
+		lineageTag: 3f9ab741-dfca-434a-bed6-3d8132316f03
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'M GameChanged' = ```
+			
+			SWITCH( TRUE(),
+			    PL_2008_2025[M HTWinTeam] = "draw", BLANK(),
+			    PL_2008_2025[M FTWinTeam] = "draw", BLANK(),
+			    PL_2008_2025[M HTWinTeam] <> PL_2008_2025[M FTWinTeam], PL_2008_2025[M FTWinTeam],
+			    BLANK()
+			)
+			
+			```
+		lineageTag: 4b1af9a8-fbad-4174-8777-1b033edf6f91
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column MostDisciplinedRefree = PL_2008_2025[Away Team Fouls Committed]+PL_2008_2025[Home Team Fouls Committed]+PL_2008_2025[Away Team Yellow Cards]+PL_2008_2025[Home Team Yellow Cards]+PL_2008_2025[Away Team Red Cards]+PL_2008_2025[Home Team Red Cards]
+		formatString: 0
+		lineageTag: 4c1a1753-3e01-4796-95e0-49afb8f6c60e
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition PL_2008_2025 = m
+		mode: import
+		source =
+				let
+				    Source = Table.Combine({PL_2009_2019, PL_2019_2025}),
+				    #"Filtered Rows" = Table.SelectRows(Source, each true),
+				    #"Appended Query" = Table.Combine({#"Filtered Rows", #"season-0809"}),
+				    #"Filtered Rows1" = Table.SelectRows(#"Appended Query", each true),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Filtered Rows1", "Date", "Date - Copy"),
+				    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Duplicated Column", {{"Date - Copy", type date}}, "en-GB"),
+				    #"Changed Type with Locale1" = Table.TransformColumnTypes(#"Changed Type with Locale", {{"Date", type date}}, "en-GB"),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type with Locale1",{"Date - Copy"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+	annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Shots Accuracy & Finishing Clusters","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Cards","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 4","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 5","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 6","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 7","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 8","ObjectType":4},"LinkType":"UsedInGroup"},{"LinkTarget":{"TableName":"Team","TableItemName":"Teams (clusters) 9","ObjectType":4},"LinkType":"UsedInGroup"}]
+

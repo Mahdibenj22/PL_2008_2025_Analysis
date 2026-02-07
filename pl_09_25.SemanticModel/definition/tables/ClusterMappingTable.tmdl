@@ -1,0 +1,63 @@
+table ClusterMappingTable
+	isHidden
+	isPrivate
+	lineageTag: 7e235635-5382-4312-8c6f-49ac8ff08542
+
+	column Teams
+		lineageTag: 70bd3ee7-7bc2-44ae-ac07-70c302db515e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Teams]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Shots Accuracy & Finishing Clusters","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column ClusterId
+		formatString: 0
+		lineageTag: 40cddfac-d1f5-49f5-9fa0-9e83d82fb174
+		summarizeBy: count
+		isNameInferred
+		sourceColumn: [ClusterId]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Shots Accuracy & Finishing Clusters","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	partition ClusterMappingTable = calculated
+		mode: import
+		source = ```
+				VAR __DS0Core = 
+					SUMMARIZECOLUMNS(
+						'Team'[Teams],
+						"M_Shot_Accuracy", 'PL_2008_2025'[M Shot Accuracy],
+						"M_Finishing", 'PL_2008_2025'[M Finishing],
+						"Total_Goals", 'Team'[Total Goals]
+					)
+				
+				VAR __DataTransformT0 = 
+					KMeansClustering(
+						SELECTCOLUMNS(
+							__DS0Core,
+							"Teams", 'Team'[Teams],
+							"M_Shot_Accuracy", [M_Shot_Accuracy],
+							"M_Finishing", [M_Finishing],
+							"Total_Goals", [Total_Goals]
+						),
+						{("[M_Shot_Accuracy]", "Attribute"),
+							("[M_Finishing]", "Attribute"),
+							("[Teams]", "Item"),
+							("[Total_Goals]", "Attribute")},
+						{("[Teams]", BLANK()),
+							("ClusterId", "ClusterId")},
+						3
+					)
+				
+				RETURN __DataTransformT0
+				```
+			retainDataTillForceCalculate
+
+	annotation ClusterMappingTable = true
+
+	annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Shots Accuracy & Finishing Clusters","ObjectType":4},"LinkType":"UsedInGroup"}]
+

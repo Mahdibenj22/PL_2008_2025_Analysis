@@ -1,0 +1,63 @@
+table 'ClusterMappingTable 2'
+	isHidden
+	isPrivate
+	lineageTag: acb12744-d4c5-470d-bc2b-d14c707effe8
+
+	column Teams
+		lineageTag: 5826997d-7aff-4376-a083-1f2a7d9a774c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Teams]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Cards","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column ClusterId
+		formatString: 0
+		lineageTag: 42ed4c2f-fd5b-413c-9e6d-e5988cf98f80
+		summarizeBy: count
+		isNameInferred
+		sourceColumn: [ClusterId]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Cards","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	partition 'ClusterMappingTable 2' = calculated
+		mode: import
+		source = ```
+				VAR __DS0Core = 
+					SUMMARIZECOLUMNS(
+						'Team'[Teams],
+						"Yellow___Match", 'PL_2008_2025'[Yellow / Match],
+						"Red___Match", 'PL_2008_2025'[Red / Match],
+						"Total_Matches", 'Team'[Total Matches]
+					)
+				
+				VAR __DataTransformT0 = 
+					KMeansClustering(
+						SELECTCOLUMNS(
+							__DS0Core,
+							"Teams", 'Team'[Teams],
+							"Yellow___Match", [Yellow___Match],
+							"Red___Match", [Red___Match],
+							"Total_Matches", [Total_Matches]
+						),
+						{("[Yellow___Match]", "Attribute"),
+							("[Red___Match]", "Attribute"),
+							("[Teams]", "Item"),
+							("[Total_Matches]", "Attribute")},
+						{("[Teams]", BLANK()),
+							("ClusterId", "ClusterId")},
+						3
+					)
+				
+				RETURN __DataTransformT0
+				```
+			retainDataTillForceCalculate
+
+	annotation ClusterMappingTable = true
+
+	annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Team","TableItemName":"Cards","ObjectType":4},"LinkType":"UsedInGroup"}]
+
