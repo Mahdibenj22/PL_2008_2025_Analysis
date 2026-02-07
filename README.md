@@ -1,204 +1,59 @@
-&nbsp;Football Premier League Analysis (2008–2025) — Power BI Dashboard
-
-
-
-Interactive Power BI report that explores whether Manchester City have been the Premier League’s “best” club in the post‑2008 era by comparing clubs across results, attacking output, defensive control, and discipline.
-
-
-
-The dashboard is intentionally “definition-driven”: instead of one score, it lets you switch seasons/windows and see which clubs lead under different metric definitions.
-
-
-
-
-
-&nbsp;1) Data
-
-
-
-\*\*Source:\*\* football-data.co.uk (match-level CSVs). The site provides computer-ready football results plus match statistics such as shots, fouls, cards, and referees (availability varies by season/league). \[page:1]
-
-
-
-\*\*Scope used in the report\*\*
-
-\- Seasons: \*\*2008/09 → 2024/25\*\*
-
-\- League: English Premier League
-
-\- Data type: results + event counts (no xG / tracking)
-
-
-
-> Note: football-data.co.uk also includes betting odds fields; this report focuses on performance outcomes and match statistics. \[page:1]
-
-
-
-
-
-&nbsp;2) Report pages (what you’ll find)
-
-
-
-&nbsp;Index / Navigation
-
-Landing page to navigate the report pages.
-
-
-
-&nbsp;Team Performance Summary
-
-High-level ranking and “who led what” views:
-
-\- Total matches, goals, yellow/red cards (context counters)
-
-\- Points per match + total points tables
-
-\- Home/away points per match top lists
-
-\- Matches won ranking
-
-
-
-&nbsp;Offensive Analysis
-
-Team attacking profile and style:
-
-\- Goals (total + per match)
-
-\- Shots vs Shots on Target per match (volume vs precision)
-
-\- Shot accuracy + finishing/goal conversion style indicators
-
-\- “Big win” / highest goal difference table (context / examples)
-
-
-
-&nbsp;Defensive Analysis
-
-Long-horizon defensive control + trend:
-
-\- Clean sheet rate
-
-\- Shots on target conceded per match
-
-\- Goals conceded per match
-
-\- Season trend line for Big 6 defensive goals conceded
-
-
-
-&nbsp;Aggression / Discipline
-
-Discipline and physicality patterns:
-
-\- Team cards, fouls
-
-\- Aggression index per match (custom)
-
-\- Yellow \& red cards per match scatter
-
-
-
-
-
-&nbsp;3) Model \& key design choices
-
-
-
-\### Core model idea
-
-A classic star approach: a \*\*Team\*\* dimension filters the match fact table(s), enabling consistent slicing across all pages.
-
-
-
-\### “Top 6” single dropdown option (Big 6 selector)
-
-The report supports a single slicer choice (“Top 6”) that filters the model to these clubs:
-
-\- Arsenal, Chelsea, Liverpool, Man City, Man United, Tottenham
-
-
-
-
-
-&nbsp;4) Reproduce the report (setup)
-
-
-
-&nbsp;Prerequisites
-
-\- Power BI Desktop (latest recommended)
-
-
-
-&nbsp;Steps
-
-1\. \*\*Get the CSVs\*\*
-
-&nbsp;  - Download Premier League season CSV files from football-data.co.uk. \[page:1]
-
-2\. \*\*Place files in your project folder\*\*
-
-&nbsp;  - Keep a consistent structure (example):
-
-&nbsp;    - `data/raw/` (downloaded CSVs)
-
-&nbsp;    - `powerbi/` (PBIX)
-
-3\. \*\*Open the PBIX\*\*
-
-&nbsp;  - Open the report in Power BI Desktop.
-
-4\. \*\*Fix file paths (first time only)\*\*
-
-&nbsp;  - Go to \*\*Transform data\*\* → update source paths to point to your local `data/raw/` folder.
-
-5\. \*\*Refresh\*\*
-
-&nbsp;  - Click \*\*Refresh\*\* to load all seasons and rebuild model tables/measures.
-
-
-
-&nbsp;Optional (recommended) UX additions
-
-\- Add a “Reset filters” button (bookmark)
-
-\- Add a minimum matches threshold to avoid small-sample extremes when filtering narrow windows
-
-
-
-
-
-
-
-&nbsp;5) Notes, assumptions, limitations
-
-
-
-\- This is a \*\*results/statistics\*\* dashboard (no xG, no tracking), so it measures outputs and repeatable tendencies rather than chance quality.
-
-\- Match-stat fields can vary by season/source; if a season has missing stats, visuals depending on those fields may be incomplete.
-
-\- Bi-directional filtering can be powerful but should be used carefully because it can affect performance/behavior; in this project it’s used to enable the bridge-table slicer behavior. \[page:2]
-
-
-
-
-
-
-
-&nbsp;Credits
-
-\- Data: football-data.co.uk \[page:1]
-
-\- Built in: Microsoft Power BI
-
-
-
-&nbsp;Author
-
+# Football Premier League Analysis (2008–2025) — Power BI Dashboard
+
+Interactive Power BI dashboard that explores whether Manchester City have been the Premier League’s “best” club in the post‑2008 era by comparing clubs across results, attacking output, defensive control, and discipline.
+
+The report is “definition-driven”: instead of one score, you can switch seasons/windows and see which clubs lead under different metric definitions.
+
+## Project format (PBIP)
+This repository stores the report as a **Power BI Project (.pbip)**, which splits the semantic model and report into text-based files that work well with Git version control. [web:1124]
+
+Main folders/files:
+- `pl_09_25.pbip` (project entry point)
+- `pl_09_25.Report/` (report definition)
+- `pl_09_25.SemanticModel/` (dataset / model definition)
+- `datapackage.json`, `schema.json` (data package metadata)
+
+## Data
+**Source:** football-data.co.uk match-level CSVs. The dataset includes results and (where available) match statistics such as shots, corners, fouls, bookings/cards, and referees. [web:978][web:1159]
+
+**Scope used in the report**
+- Seasons: **2008/09 → 2024/25**
+- League: English Premier League
+- Data type: results + event counts (no xG / tracking)
+
+### Where are the CSV files?
+This GitHub repository does **not** include the raw CSV files (they are ignored via `.gitignore`).  
+To reproduce the report locally, download the required Premier League season CSVs from football-data.co.uk and place them in a local data folder (see setup below). [web:978]
+
+## Report pages (what you’ll find)
+- **Index / Navigation:** Landing page to navigate the report.
+- **Team Performance Summary:** Points, wins, home/away splits, basic context counters.
+- **Offensive Analysis:** Goals, shots, shots on target, accuracy-style indicators.
+- **Defensive Analysis:** Clean sheets, shots on target conceded, goals conceded, Big 6 trend.
+- **Aggression / Discipline:** Fouls/cards and custom aggression views.
+
+## Model & key design choices
+- Star-style modeling with a Team dimension filtering match facts.
+- Includes a “Top 6” slicer option (Arsenal, Chelsea, Liverpool, Man City, Man United, Tottenham) implemented via a bridge-style pattern (may require careful relationship filtering depending on your model design). [web:1058]
+
+## Run it locally (Power BI Desktop)
+### Prerequisites
+- Power BI Desktop
+
+### Steps
+1. Download the Premier League season CSV files from football-data.co.uk. [web:978]
+2. Create a local folder (example): `data/raw/` and put the CSVs there.
+3. Open `pl_09_25.pbip` in Power BI Desktop. [web:1124]
+4. In Power BI Desktop: **Transform data** → update the source paths/parameters (first time only) so they point to your local `data/raw/`.
+5. Click **Refresh**.
+
+## Notes / limitations
+- This is a results/statistics dashboard (no xG, no tracking), so it reflects outputs and event counts rather than chance quality.
+- Some match-stat columns can vary by season/source; visuals depending on missing fields may be incomplete. [web:1159]
+
+## Credits
+- Data: football-data.co.uk [web:978]
+- Built with: Microsoft Power BI
+
+## Author
 Mahdi Ben Jemaa
-
-
-
