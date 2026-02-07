@@ -7,7 +7,7 @@ The dashboard is intentionally definition-driven: instead of one score, it lets 
 ## Download & open (recommended)
 The easiest way to view the dashboard is to download the **PBIX** from the latest GitHub Release:
 
-- Latest release page: https://github.com/Mahdibenj22/PL_2008_2025_Analysisis/releases/latest [web:1256]
+- Latest release page: sha256:c5d0f001ba2a95f3c12482aa04eba6639c8bba5225ce82ea22321eb6dd4ab95c
 
 Download the `.pbix` asset from that page, then open it in **Power BI Desktop**.
 
