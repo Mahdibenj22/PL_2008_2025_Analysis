@@ -1,59 +1,83 @@
 # Football Premier League Analysis (2008–2025) — Power BI Dashboard
 
-Interactive Power BI dashboard that explores whether Manchester City have been the Premier League’s “best” club in the post‑2008 era by comparing clubs across results, attacking output, defensive control, and discipline.
+Interactive Power BI report that explores whether Manchester City have been the Premier League’s “best” club in the post‑2008 era by comparing clubs across results, attacking output, defensive control, and discipline.
 
-The report is “definition-driven”: instead of one score, you can switch seasons/windows and see which clubs lead under different metric definitions.
+The dashboard is intentionally definition-driven: instead of one score, it lets you switch seasons/windows and see which clubs lead under different metric definitions.
 
-## Project format (PBIP)
-This repository stores the report as a **Power BI Project (.pbip)**, which splits the semantic model and report into text-based files that work well with Git version control. [web:1124]
+## Download & open (recommended)
+The easiest way to view the dashboard is to download the **PBIX** from the latest GitHub Release:
 
-Main folders/files:
-- `pl_09_25.pbip` (project entry point)
-- `pl_09_25.Report/` (report definition)
-- `pl_09_25.SemanticModel/` (dataset / model definition)
-- `datapackage.json`, `schema.json` (data package metadata)
+- Latest release page: https://github.com/Mahdibenj22/PL_2008_2025_Analysisis/releases/latest [web:1256]
 
-## Data
-**Source:** football-data.co.uk match-level CSVs. The dataset includes results and (where available) match statistics such as shots, corners, fouls, bookings/cards, and referees. [web:978][web:1159]
+Download the `.pbix` asset from that page, then open it in **Power BI Desktop**.
 
-**Scope used in the report**
-- Seasons: **2008/09 → 2024/25**
-- League: English Premier League
-- Data type: results + event counts (no xG / tracking)
+## Data (included in this repo)
+This repository includes the match-level Premier League CSV files under:
 
-### Where are the CSV files?
-This GitHub repository does **not** include the raw CSV files (they are ignored via `.gitignore`).  
-To reproduce the report locally, download the required Premier League season CSVs from football-data.co.uk and place them in a local data folder (see setup below). [web:978]
+- `PL_2008_2025/`
 
-## Report pages (what you’ll find)
-- **Index / Navigation:** Landing page to navigate the report.
-- **Team Performance Summary:** Points, wins, home/away splits, basic context counters.
-- **Offensive Analysis:** Goals, shots, shots on target, accuracy-style indicators.
-- **Defensive Analysis:** Clean sheets, shots on target conceded, goals conceded, Big 6 trend.
-- **Aggression / Discipline:** Fouls/cards and custom aggression views.
+If your PBIX prompts “can’t find file / credentials”, it’s usually because Power BI still points to the original file path from the author’s computer.
 
-## Model & key design choices
-- Star-style modeling with a Team dimension filtering match facts.
-- Includes a “Top 6” slicer option (Arsenal, Chelsea, Liverpool, Man City, Man United, Tottenham) implemented via a bridge-style pattern (may require careful relationship filtering depending on your model design). [web:1058]
+### Fix data paths (first time only)
+After cloning/downloading this repo:
 
-## Run it locally (Power BI Desktop)
-### Prerequisites
-- Power BI Desktop
+1. Open the PBIX (or the PBIP project) in Power BI Desktop.
+2. Go to **Transform data** (Power Query).
+3. Find the query step that references the folder/file path and update it to your local path, pointing to this repo’s `PL_2008_2025/` folder.
+4. Click **Close & Apply**, then **Refresh**.
 
-### Steps
-1. Download the Premier League season CSV files from football-data.co.uk. [web:978]
-2. Create a local folder (example): `data/raw/` and put the CSVs there.
-3. Open `pl_09_25.pbip` in Power BI Desktop. [web:1124]
-4. In Power BI Desktop: **Transform data** → update the source paths/parameters (first time only) so they point to your local `data/raw/`.
-5. Click **Refresh**.
+Tip: If you downloaded the repo as ZIP, make sure you **extract** it first (don’t open from inside the ZIP). [web:1252]
 
-## Notes / limitations
-- This is a results/statistics dashboard (no xG, no tracking), so it reflects outputs and event counts rather than chance quality.
-- Some match-stat columns can vary by season/source; visuals depending on missing fields may be incomplete. [web:1159]
+## Quick start (no Git)
+1. GitHub repo page → click **Code → Download ZIP**, then unzip. [web:1252]
+2. Open the PBIX from the Release (section above).
+3. If prompted, set the data path to: `<unzipped-folder>\PL_2008_2025\`, then Refresh.
 
-## Credits
-- Data: football-data.co.uk [web:978]
-- Built with: Microsoft Power BI
+## Quick start (with Git)
+```bash
+git clone https://github.com/Mahdibenj22/PL_2008_2025_Analysisis.git
+Then:
 
-## Author
+Open the PBIX from Releases (recommended), or open the PBIP project (below).
+
+Update the data path to: <cloned-folder>\PL_2008_2025\, then Refresh.
+
+Project format (PBIP) — for developers
+This repository also contains a Power BI Project (.pbip) version for source control and collaboration:
+
+pl_09_25.pbip
+
+pl_09_25.Report/
+
+pl_09_25.SemanticModel/
+
+PBIP stores the report and semantic model as text-based definitions, which works well with Git workflows. [web:1124]
+
+Report pages (what you’ll find)
+Index / Navigation: Landing page to navigate the report.
+
+Team Performance Summary: Points, wins, home/away splits, and context counters.
+
+Offensive Analysis: Goals, shots, shots on target, accuracy-style indicators.
+
+Defensive Analysis: Clean sheets, shots on target conceded, goals conceded, Big 6 trend.
+
+Aggression / Discipline: Fouls/cards and custom aggression views.
+
+Scope used in the report
+Seasons: 2008/09 → 2024/25
+
+League: English Premier League
+
+Data type: results + match statistics counts (no xG / tracking)
+
+Notes / limitations
+Match-stat fields can vary by season/source; if a season has missing stats, visuals depending on those fields may be incomplete.
+
+Credits
+Data: football-data.co.uk (historical results + match stats CSVs) [web:978][web:1159]
+
+Built with: Microsoft Power BI
+
+Author
 Mahdi Ben Jemaa
